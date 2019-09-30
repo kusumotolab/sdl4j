@@ -87,7 +87,8 @@ public class Apriori<Item> implements ItemSetMining<Item> {
     return itemSet;
   }
 
-  private Set<ItemSet<Item>> convertAndFilter(final Set<Set<Item>> transactions, final Collection<ItemSet<Item>> collections, final int theta) {
+  private Set<ItemSet<Item>> convertAndFilter(final Set<Set<Item>> transactions,
+      final Collection<ItemSet<Item>> collections, final int theta) {
     final Set<ItemSet<Item>> items = new HashSet<>();
     for (final ItemSet<Item> itemSet : collections) {
       final long count = transactions.stream()
@@ -112,7 +113,8 @@ public class Apriori<Item> implements ItemSetMining<Item> {
     public void beginCalculatingNextDk(final int k, final Set<ItemSet<Item>> dk) {
     }
 
-    public void endCalculatingNextDk(final int k, final Set<ItemSet<Item>> dk, final Set<ItemSet<Item>> nextDk) {
+    public void endCalculatingNextDk(final int k, final Set<ItemSet<Item>> dk,
+        final Set<ItemSet<Item>> nextDk) {
     }
   }
 }
