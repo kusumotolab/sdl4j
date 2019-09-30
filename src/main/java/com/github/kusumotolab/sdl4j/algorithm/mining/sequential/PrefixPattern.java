@@ -1,4 +1,4 @@
-package com.github.kusumotolab.algorithm.mining.sequential;
+package com.github.kusumotolab.sdl4j.algorithm.mining.sequential;
 
 import java.util.Collection;
 import java.util.HashMap;

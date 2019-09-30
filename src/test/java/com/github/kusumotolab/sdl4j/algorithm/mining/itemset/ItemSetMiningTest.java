@@ -1,4 +1,4 @@
-package com.github.kusumotolab.algorithm.mining.itemset;
+package com.github.kusumotolab.sdl4j.algorithm.mining.itemset;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Set;

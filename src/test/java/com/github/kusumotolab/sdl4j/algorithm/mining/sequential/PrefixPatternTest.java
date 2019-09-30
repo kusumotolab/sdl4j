@@ -1,8 +1,9 @@
-package com.github.kusumotolab.algorithm.mining.sequential;
+package com.github.kusumotolab.sdl4j.algorithm.mining.sequential;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.Set;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -20,7 +21,7 @@ public class PrefixPatternTest {
   public void testExecute() {
     final SequentialPatternMining<Integer> patternMining = new PrefixPattern<>();
     final Set<SequentialPattern<Integer>> patterns = patternMining.execute(transactions, 2);
-    assertThat(patterns)
+    Assertions.assertThat(patterns)
         .contains(new SequentialPattern<>(Lists.newArrayList(1)))
         .contains(new SequentialPattern<>(Lists.newArrayList(2)))
         .contains(new SequentialPattern<>(Lists.newArrayList(3)))
