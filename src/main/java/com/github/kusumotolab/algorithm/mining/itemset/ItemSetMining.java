@@ -1,4 +1,4 @@
-package com.github.kusumotolab.algorithm.itemsetmining;
+package com.github.kusumotolab.algorithm.mining.itemset;
 
 import java.util.Set;
 
