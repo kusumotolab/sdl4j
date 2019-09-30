@@ -9,11 +9,15 @@ public class ItemSet<T> extends HashSet<T> {
   public ItemSet() {
   }
 
+  public ItemSet(final T item) {
+    this.add(item);
+  }
+
   public ItemSet(final Collection<? extends T> c) {
     super(c);
   }
 
-  synchronized void setCounter(int counter) {
+  void setCounter(int counter) {
     this.counter = counter;
   }
 

@@ -1,7 +1,6 @@
 package com.github.kusumotolab.algorithm.itemsetmining;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,13 +12,13 @@ import java.util.stream.Stream;
 
 public class Apriori<Item> implements ItemSetMining<Item> {
 
-  private final Observer<Item> observer;
+  private final AprioriObserver<Item> observer;
 
   public Apriori() {
-    this(new Observer<>());
+    this(new AprioriObserver<>());
   }
 
-  public Apriori(final Observer<Item> observer) {
+  public Apriori(final AprioriObserver<Item> observer) {
     this.observer = observer;
   }
 
@@ -54,7 +53,7 @@ public class Apriori<Item> implements ItemSetMining<Item> {
         .collect(Collectors.toList());
 
     for (final Item item : items) {
-      final ItemSet<Item> itemSet = itemMap.computeIfAbsent(item, this::createItemSet);
+      final ItemSet<Item> itemSet = itemMap.computeIfAbsent(item, ItemSet::new);
       itemMap.put(item, itemSet);
     }
     return convertAndFilter(transactions, itemMap.values(), theta);
@@ -80,35 +79,18 @@ public class Apriori<Item> implements ItemSetMining<Item> {
     return convertAndFilter(transactions, results.values(), theta);
   }
 
-  @SafeVarargs
-  private final ItemSet<Item> createItemSet(final Item... items) {
-    final ItemSet<Item> itemSet = new ItemSet<>();
-    itemSet.addAll(Arrays.asList(items));
-    return itemSet;
-  }
-
   private Set<ItemSet<Item>> convertAndFilter(final Set<Set<Item>> transactions,
       final Collection<ItemSet<Item>> collections, final int theta) {
-    final Set<ItemSet<Item>> items = new HashSet<>();
-    for (final ItemSet<Item> itemSet : collections) {
-      final long count = transactions.stream()
-          .filter(e -> e.containsAll(itemSet))
-          .count();
-      itemSet.setCounter(((int) count));
-      if (itemSet.count() >= theta) {
-        items.add(itemSet);
-      }
-    }
-    return items;
+    return collections.stream()
+        .filter(itemSet -> {
+          final long count = countContainedTransactions(itemSet, transactions);
+          itemSet.setCounter(((int) count));
+          return itemSet.count() >= theta;
+        })
+        .collect(Collectors.toSet());
   }
 
-  public static class Observer<Item> {
-
-    public void start(final Set<Set<Item>> transactions, final int theta) {
-    }
-
-    public void end(final Set<ItemSet<Item>> output) {
-    }
+  public static class AprioriObserver<Item> extends Observer<Item> {
 
     public void beginCalculatingNextDk(final int k, final Set<ItemSet<Item>> dk) {
     }
