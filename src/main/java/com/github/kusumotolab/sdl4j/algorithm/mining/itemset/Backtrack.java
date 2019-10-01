@@ -52,7 +52,6 @@ public class Backtrack<Item> implements ItemSetMining<Item> {
   private List<Item> extractElements(final Set<Set<Item>> transactions, final int theta) {
     return transactions.stream()
         .flatMap(Collection::stream)
-        .sorted()
         .distinct()
         .filter(e -> countContainedTransactions(new ItemSet<>(e), transactions) >= theta)
         .collect(Collectors.toList());
