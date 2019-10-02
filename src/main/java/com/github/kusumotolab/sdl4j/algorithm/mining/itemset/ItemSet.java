@@ -2,8 +2,9 @@ package com.github.kusumotolab.sdl4j.algorithm.mining.itemset;
 
 import java.util.Collection;
 import java.util.HashSet;
+import com.github.kusumotolab.sdl4j.algorithm.mining.CountablePattern;
 
-public class ItemSet<T> extends HashSet<T> {
+public class ItemSet<T> extends HashSet<T> implements CountablePattern {
   private int counter = 0;
 
   public ItemSet() {
@@ -21,7 +22,8 @@ public class ItemSet<T> extends HashSet<T> {
     this.counter = counter;
   }
 
-  public int count() {
+  @Override
+  public int countPatten() {
     return counter;
   }
 }

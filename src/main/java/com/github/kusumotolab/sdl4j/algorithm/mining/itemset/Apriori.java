@@ -85,7 +85,7 @@ public class Apriori<Item> implements ItemSetMining<Item> {
         .filter(itemSet -> {
           final long count = countContainedTransactions(itemSet, transactions);
           itemSet.setCounter(((int) count));
-          return itemSet.count() >= theta;
+          return itemSet.countPatten() >= theta;
         })
         .collect(Collectors.toSet());
   }

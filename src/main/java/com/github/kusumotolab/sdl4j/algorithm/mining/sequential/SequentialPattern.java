@@ -2,8 +2,9 @@ package com.github.kusumotolab.sdl4j.algorithm.mining.sequential;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import com.github.kusumotolab.sdl4j.algorithm.mining.CountablePattern;
 
-public class SequentialPattern<Item> extends ArrayList<Item> {
+public class SequentialPattern<Item> extends ArrayList<Item> implements CountablePattern {
   private int counter = 0;
 
   public SequentialPattern() {
@@ -21,7 +22,8 @@ public class SequentialPattern<Item> extends ArrayList<Item> {
     this.counter = counter;
   }
 
-  public int count() {
+  @Override
+  public int countPatten() {
     return counter;
   }
 }
