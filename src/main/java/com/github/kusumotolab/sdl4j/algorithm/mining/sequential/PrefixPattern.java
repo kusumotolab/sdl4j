@@ -13,20 +13,35 @@ import com.google.common.collect.Sets;
 
 public class PrefixPattern<Item> implements SequentialPatternMining<Item> {
 
+  private final Observer<Item> observer;
+
+  public PrefixPattern() {
+    this(new Observer<>());
+  }
+
+  public PrefixPattern(final Observer<Item> observer) {
+    this.observer = observer;
+  }
+
   @Override
   public Set<SequentialPattern<Item>> execute(final Set<List<Item>> transactions, final int theta) {
+    observer.start(transactions, theta);
     final Set<SequentialPattern<Item>> output = Sets.newHashSet();
     prefixPattern(transactions, theta, Lists.newArrayList(), output);
+    observer.finish(output);
+
     return output;
   }
 
   private void prefixPattern(final Set<List<Item>> transactions, final int theta,
       final List<Item> prefix, final Set<SequentialPattern<Item>> output) {
+    observer.beginCalculatingForPrefix(prefix, output);
     final Set<Item> occurredElements = extractOccurredElements(transactions, theta);
     for (final Item item : occurredElements) {
       final Set<List<Item>> newTransactions = transactions.stream()
           .filter(e -> e.contains(item))
-          .map(transaction -> transaction.subList(transaction.indexOf(item) + 1, transaction.size()))
+          .map(
+              transaction -> transaction.subList(transaction.indexOf(item) + 1, transaction.size()))
           .filter(e -> !e.isEmpty())
           .collect(Collectors.toSet());
 
@@ -35,9 +50,11 @@ public class PrefixPattern<Item> implements SequentialPatternMining<Item> {
 
       final SequentialPattern<Item> sequentialPattern = new SequentialPattern<>(newPrefix);
       output.add(sequentialPattern);
+      observer.foundNewSequentialPattern(prefix, sequentialPattern, output);
 
       prefixPattern(newTransactions, theta, newPrefix, output);
     }
+    observer.enCalculatingForPrefix(prefix, output);
   }
 
   private Set<Item> extractOccurredElements(final Set<List<Item>> transactions, final int theta) {
@@ -57,5 +74,26 @@ public class PrefixPattern<Item> implements SequentialPatternMining<Item> {
         .filter(e -> e.getValue() >= theta)
         .map(Entry::getKey)
         .collect(Collectors.toSet());
+  }
+
+  public static class Observer<Item> {
+
+    public void start(final Set<List<Item>> transactions, final int theta) {
+    }
+
+    public void finish(final Set<SequentialPattern<Item>> output) {
+    }
+
+    public void beginCalculatingForPrefix(final List<Item> prefixList,
+        final Set<SequentialPattern<Item>> output) {
+    }
+
+    public void enCalculatingForPrefix(final List<Item> prefixList,
+        final Set<SequentialPattern<Item>> output) {
+    }
+
+    public void foundNewSequentialPattern(final List<Item> prefixList,
+        final SequentialPattern<Item> newPattern, final Set<SequentialPattern<Item>> output) {
+    }
   }
 }

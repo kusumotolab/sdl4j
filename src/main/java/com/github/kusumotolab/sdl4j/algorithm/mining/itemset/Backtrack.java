@@ -27,7 +27,7 @@ public class Backtrack<Item> implements ItemSetMining<Item> {
     final List<Item> elements = extractElements(transactions, theta);
     backtrack(Lists.newArrayList(), elements, 0, theta, transactions, outputs);
 
-    observer.end(outputs);
+    observer.finish(outputs);
     return outputs;
   }
 

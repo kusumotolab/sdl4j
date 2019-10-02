@@ -18,7 +18,7 @@ public interface ItemSetMining<Item> {
     public void start(final Set<Set<Item>> transactions, final int theta) {
     }
 
-    public void end(final Set<ItemSet<Item>> output) {
+    public void finish(final Set<ItemSet<Item>> output) {
     }
   }
 }

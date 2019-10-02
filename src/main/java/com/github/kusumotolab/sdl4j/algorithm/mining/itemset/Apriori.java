@@ -41,7 +41,7 @@ public class Apriori<Item> implements ItemSetMining<Item> {
       dk = nextDk;
       itemSets.addAll(nextDk);
     }
-    observer.end(itemSets);
+    observer.finish(itemSets);
     return itemSets;
   }
 
