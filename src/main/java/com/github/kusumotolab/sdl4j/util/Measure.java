@@ -1,31 +1,33 @@
 package com.github.kusumotolab.sdl4j.util;
 
+import java.time.Duration;
 import java.util.function.Supplier;
+import com.google.common.base.Stopwatch;
 
 public class Measure {
 
   public static <T> MeasuredResult<T> time(final Supplier<T> supplier) {
-    final long startTime = System.currentTimeMillis();
+    final Stopwatch stopwatch = Stopwatch.createStarted();
     final T value = supplier.get();
-    final long endTime = System.currentTimeMillis();
-    return new MeasuredResult<>(value, startTime - endTime);
+    stopwatch.stop();
+    return new MeasuredResult<>(value, stopwatch.elapsed());
   }
 
   public static class MeasuredResult<T> {
     private final T value;
-    private final long time;
+    private final Duration duration;
 
-    public MeasuredResult(final T value, final long time) {
+    public MeasuredResult(final T value, final Duration duration) {
       this.value = value;
-      this.time = time;
+      this.duration = duration;
     }
 
     public T getValue() {
       return value;
     }
 
-    public long getMsTime() {
-      return time;
+    public Duration getDuration() {
+      return duration;
     }
   }
 }
