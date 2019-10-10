@@ -1,5 +1,17 @@
 # sdl4j
-このライブラリは楠本研究室でJavaを用いて研究をする際によく実装する処理をまとめたものになっています．
+このリポジトリは楠本研究室でJavaを用いて研究をする際によく実装する処理をまとめたライブラリになっています．
+
+## How To Use
+build.gradleに以下を追加してくだい．
+```groovy
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    implementation 'com.github.kusumotolab:sdl4j:master'
+}
+```
 
 ## 機能
 ### アルゴリズム
