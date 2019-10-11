@@ -36,8 +36,9 @@ public class PrefixPattern<Item> implements SequentialPatternMining<Item> {
   private void prefixPattern(final Set<List<Item>> transactions, final int theta,
       final List<Item> prefix, final Set<SequentialPattern<Item>> output) {
     observer.beginCalculatingForPrefix(prefix, output);
-    final Set<Item> occurredElements = extractOccurredElements(transactions, theta);
-    for (final Item item : occurredElements) {
+    final Set<Element> occurredElements = extractOccurredElements(transactions, theta);
+    for (final Element element : occurredElements) {
+      final Item item = element.item;
       final Set<List<Item>> newTransactions = transactions.stream()
           .filter(e -> e.contains(item))
           .map(
@@ -49,6 +50,8 @@ public class PrefixPattern<Item> implements SequentialPatternMining<Item> {
       newPrefix.add(item);
 
       final SequentialPattern<Item> sequentialPattern = new SequentialPattern<>(newPrefix);
+      sequentialPattern.setCounter(element.count);
+
       output.add(sequentialPattern);
       observer.foundNewSequentialPattern(prefix, sequentialPattern, output);
 
@@ -57,7 +60,17 @@ public class PrefixPattern<Item> implements SequentialPatternMining<Item> {
     observer.enCalculatingForPrefix(prefix, output);
   }
 
-  private Set<Item> extractOccurredElements(final Set<List<Item>> transactions, final int theta) {
+ private class Element {
+    final Item item;
+    final int count;
+
+   public Element(final Item item, final int count) {
+     this.item = item;
+     this.count = count;
+   }
+ }
+
+  private Set<Element> extractOccurredElements(final Set<List<Item>> transactions, final int theta) {
     final Map<Item, Integer> map = new HashMap<>();
 
     transactions.stream()
@@ -72,7 +85,7 @@ public class PrefixPattern<Item> implements SequentialPatternMining<Item> {
     return map.entrySet()
         .stream()
         .filter(e -> e.getValue() >= theta)
-        .map(Entry::getKey)
+        .map(e -> new Element(e.getKey(), e.getValue()))
         .collect(Collectors.toSet());
   }
 
