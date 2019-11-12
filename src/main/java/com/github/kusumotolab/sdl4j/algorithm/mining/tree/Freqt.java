@@ -36,8 +36,7 @@ public class Freqt<T> implements SubtreeMining<T> {
         .map(Node::getDescents)
         .mapToLong(Collection::size)
         .sum();
-    final int border = (int) (((double) sum) * minimumSupport);
-    return border;
+    return (int) (((double) sum) * minimumSupport);
   }
 
   private Set<TreePattern<T>> extractF1(final Set<Node<T>> trees, final int borderline) {

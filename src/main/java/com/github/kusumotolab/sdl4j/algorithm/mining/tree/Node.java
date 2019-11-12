@@ -155,13 +155,12 @@ public class Node<T> {
     final Node<?> node = (Node<?>) o;
     return position == node.position &&
         Objects.equals(label, node.label) &&
-        Objects.equals(parent, node.parent) && // parentが親まで行って遅い可能性あり
         Objects.equals(children, node.children); // childrenが末端まで行って遅い可能性あり
   }
 
   @Override
   public int hashCode() {
     // childrenが末端まで行って遅い可能性あり
-    return Objects.hash(label, parent, position, children);
+    return Objects.hash(label, position, children);
   }
 }
