@@ -1,10 +1,15 @@
 package com.github.kusumotolab.sdl4j.algorithm.mining.tree;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import org.assertj.core.util.Sets;
 import org.junit.Test;
 import com.google.common.collect.Lists;
 
 public class FreqtTest {
+
   private final List<Label<Integer>> labels = Lists.newArrayList(
       new Label<>(0, 0), // 1
       new Label<>(1, 1), // 2
@@ -20,13 +25,18 @@ public class FreqtTest {
       new Label<>(2, 1), // 12
       new Label<>(3, 2), // 13
       new Label<>(3, 3), // 14
-      new Label<>(4, 4) // 15
+      new Label<>(4, 4)  // 15
   );
 
   @Test
   public void testMining() {
     final Node<Integer> rootNode = Node.createTree(labels);
+    final Set<Node<Integer>> trees = Sets.newHashSet();
+    trees.add(rootNode);
+
     final Freqt<Integer> freqt = new Freqt<>();
-    freqt.mining()
+    final Set<TreePattern<Integer>> result = freqt.mining(trees, 0.2);
+    result.forEach(e -> System.out.println(e.getRootNode().toLongString() + "\n"));
+    assertThat(result).hasSize(10);
   }
 }

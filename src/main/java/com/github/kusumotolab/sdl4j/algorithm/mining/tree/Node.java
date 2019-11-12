@@ -115,29 +115,33 @@ public class Node<T> {
     return children.isEmpty();
   }
 
-  public boolean contains(final Node<T> subtree) {
+  public int countPatterns(final Node<T> subtree) {
+    int counter = 0;
     final T subtreeLabel = subtree.getLabel();
     for (final Node<T> node : getDescents()) {
       final T label = node.getLabel();
       if (!label.equals(subtreeLabel)) {
         continue;
       }
-      if (node.containsInOrder(subtree.getLabels())) {
-        return true;
+      if (node.containsInOrder(subtree)) {
+        counter+= 1;
       }
     }
-    return false;
+    return counter;
   }
 
-  private boolean containsInOrder(final List<Label<T>> subtreesLabels) {
+  // root同士の比較
+  private boolean containsInOrder(final Node<T> subtree) {
+    final List<Label<T>> thisLabels = getLabels();
+    final List<Label<T>> subtreeLabels = subtree.getLabels();
     int index = 0;
-    for (final Label<T> element : getLabels()) {
-      final Label<T> subtreeLabel = subtreesLabels.get(index);
+    for (final Label<T> element : thisLabels) {
+      final Label<T> subtreeLabel = subtreeLabels.get(index);
       if (!subtreeLabel.equals(element)) {
         continue;
       }
       index++;
-      if (index == subtreesLabels.size()) {
+      if (index == subtreeLabels.size()) {
         return true;
       }
     }
@@ -153,14 +157,28 @@ public class Node<T> {
       return false;
     }
     final Node<?> node = (Node<?>) o;
-    return position == node.position &&
-        Objects.equals(label, node.label) &&
+    return Objects.equals(label, node.label) &&
         Objects.equals(children, node.children); // childrenが末端まで行って遅い可能性あり
   }
 
   @Override
   public int hashCode() {
     // childrenが末端まで行って遅い可能性あり
-    return Objects.hash(label, position, children);
+    return Objects.hash(label, children);
+  }
+
+  public String toLongString() {
+    final List<Label<T>> labels = getLabels();
+    final StringBuilder stringBuilder = new StringBuilder();
+    for (final Label<T> label : labels) {
+      if (stringBuilder.length() != 0) {
+        stringBuilder.append("\n");
+      }
+      for (int i = 0; i < label.getDepth(); i++) {
+        stringBuilder.append("  ");
+      }
+      stringBuilder.append(label.toString());
+    }
+    return stringBuilder.toString();
   }
 }

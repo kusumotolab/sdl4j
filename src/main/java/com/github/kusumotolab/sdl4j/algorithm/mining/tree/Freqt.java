@@ -25,6 +25,7 @@ public class Freqt<T> implements SubtreeMining<T> {
     Set<TreePattern<T>> fk = f2;
     while (!fk.isEmpty()) {
       final Set<TreePattern<T>> fkPlus1 = extractFkPlus1(trees, k, fk, f1, f2, borderline);
+      results.addAll(fkPlus1);
       k += 1;
       fk = fkPlus1;
     }
@@ -46,15 +47,16 @@ public class Freqt<T> implements SubtreeMining<T> {
         .map(Node::getDescents)
         .flatMap(Collection::stream)
         .forEach(node -> {
-          final Integer count = map.computeIfAbsent(node.getLabel(), e -> 0);
-          map.put(node.getLabel(), count + 1);
+          final T label = node.getLabel();
+          final Integer count = map.computeIfAbsent(label, e -> 0);
+          map.put(label, count + 1);
         });
 
     return map.entrySet()
         .stream()
         .filter(e -> {
           final Integer count = e.getValue();
-          return count > borderline;
+          return count >= borderline;
         })
         .map(e -> new TreePattern<>(Node.createRootNode(e.getKey()), e.getValue()))
         .collect(Collectors.toSet());
@@ -83,7 +85,7 @@ public class Freqt<T> implements SubtreeMining<T> {
           final int count = countPattern(trees, node);
           return new TreePattern<>(node, count);
         })
-        .filter(e -> e.countPatten() > borderline)
+        .filter(e -> e.countPatten() >= borderline)
         .collect(Collectors.toSet());
   }
 
@@ -120,13 +122,14 @@ public class Freqt<T> implements SubtreeMining<T> {
           final int count = countPattern(trees, candidate);
           return new TreePattern<>(candidate, count);
         })
-        .filter(candidate -> candidate.countPatten() > borderline)
+        .filter(candidate -> candidate.countPatten() >= borderline)
         .collect(Collectors.toSet());
   }
 
   private int countPattern(final Set<Node<T>> rootTrees, final Node<T> subtree) {
-    return ((int) rootTrees.stream()
-        .filter(tree -> tree.contains(subtree))
-        .count());
+    return rootTrees.stream()
+        .map(tree -> tree.countPatterns(subtree))
+        .reduce(Integer::sum)
+        .orElse(0);
   }
 }
