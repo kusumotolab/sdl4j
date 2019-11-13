@@ -1,7 +1,6 @@
 package com.github.kusumotolab.sdl4j.algorithm.mining.tree;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.assertj.core.util.Sets;

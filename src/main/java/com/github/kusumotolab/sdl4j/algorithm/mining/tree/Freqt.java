@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
 public class Freqt<T> implements SubtreeMining<T> {
@@ -21,12 +23,12 @@ public class Freqt<T> implements SubtreeMining<T> {
     final Set<TreePattern<T>> f2 = extractF2(trees, f1, borderline);
     results.addAll(f2);
 
-    int k = 2;
+    final Multimap<T, Node<T>> f2Map = createF2Map(f1, f2);
+
     Set<TreePattern<T>> fk = f2;
     while (!fk.isEmpty()) {
-      final Set<TreePattern<T>> fkPlus1 = extractFkPlus1(trees, k, fk, f1, f2, borderline);
+      final Set<TreePattern<T>> fkPlus1 = extractFkPlus1(trees, fk, f2Map, borderline);
       results.addAll(fkPlus1);
-      k += 1;
       fk = fkPlus1;
     }
     return results;
@@ -64,7 +66,7 @@ public class Freqt<T> implements SubtreeMining<T> {
 
   private Set<TreePattern<T>> extractF2(final Set<Node<T>> trees, final Set<TreePattern<T>> f1,
       final int borderline) {
-    final Map<String, Node<T>> c2 = Maps.newHashMap();
+    final Set<Node<T>> candidates = Sets.newHashSet();
     for (final TreePattern<T> element1 : f1) {
       final T label1 = element1.getRootNode()
           .getLabel();
@@ -72,15 +74,10 @@ public class Freqt<T> implements SubtreeMining<T> {
         final Node<T> root = Node.createRootNode(label1);
         root.createChildNode(element2.getRootNode()
             .getLabel());
-        final List<Label<T>> labels = root.getLabels();
-        final String treeText = labels.stream()
-            .map(Label::toString)
-            .collect(Collectors.joining("・"));
-        c2.put(treeText, root);
+        candidates.add(root);
       }
     }
-    return c2.values()
-        .stream()
+    return candidates.stream()
         .map(node -> {
           final int count = countPattern(trees, node);
           return new TreePattern<>(node, count);
@@ -89,29 +86,32 @@ public class Freqt<T> implements SubtreeMining<T> {
         .collect(Collectors.toSet());
   }
 
-  private Set<TreePattern<T>> extractFkPlus1(final Set<Node<T>> trees, final int k,
-      final Set<TreePattern<T>> _fk, final Set<TreePattern<T>> f1, final Set<TreePattern<T>> f2,
-      final int borderline) {
+  private Multimap<T, Node<T>> createF2Map(final Set<TreePattern<T>> f1,
+      final Set<TreePattern<T>> f2) {
+    final Multimap<T, Node<T>> f2Map = HashMultimap.create(f1.size(), f2.size());
+    for (final TreePattern<T> pattern : f2) {
+      final Node<T> rootNode = pattern.getRootNode();
+      f2Map.put(rootNode.getLabel(), rootNode.getRightChild());
+    }
+    return f2Map;
+  }
+
+  private Set<TreePattern<T>> extractFkPlus1(final Set<Node<T>> trees, final Set<TreePattern<T>> fk,
+      final Multimap<T, Node<T>> f2Cache, final int borderline) {
     final Set<Node<T>> candidates = Sets.newHashSet();
-    for (final TreePattern<T> treePattern : _fk) {
+    for (final TreePattern<T> treePattern : fk) {
       final Node<T> rootNode = treePattern.getRootNode();
       final List<Node<T>> rightMostBranch = rootNode.getRightMostBranch();
 
       for (int index = 0; index < rightMostBranch.size(); index++) {
         // Nodeのタイプとf2から挿入するラベルを選ぶ
         final Node<T> node = rightMostBranch.get(index);
-        final Set<Node<T>> equalRootNodes = f2.stream()
-            .map(TreePattern::getRootNode)
-            .filter(t -> t.getLabel()
-                .equals(node.getLabel()))
-            .collect(Collectors.toSet());
-        for (final Node<T> equalRootNode : equalRootNodes) {
-          final List<Node<T>> children = equalRootNode.getChildren();
-          final Node<T> child = children.get(0);
+        final Set<Node<T>> candidateNodes = Sets.newHashSet(f2Cache.get(node.getLabel()));
+        for (final Node<T> candidateNode : candidateNodes) {
           final Node<T> copiedRootNode = rootNode.deepCopy();
           copiedRootNode.getRightMostBranch()
               .get(index)
-              .createChildNode(child.getLabel());
+              .createChildNode(candidateNode.getLabel());
           candidates.add(copiedRootNode);
         }
       }

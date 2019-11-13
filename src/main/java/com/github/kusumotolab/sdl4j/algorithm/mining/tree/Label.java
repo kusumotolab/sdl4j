@@ -22,7 +22,7 @@ public class Label<T> {
 
   @Override
   public String toString() {
-    return "(" + depth + "," + label.toString() + ")";
+    return "(" + depth + ", " + label.toString() + ")";
   }
 
   @Override
