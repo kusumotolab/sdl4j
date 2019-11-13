@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
@@ -88,7 +88,7 @@ public class Freqt<T> implements SubtreeMining<T> {
 
   private Multimap<T, Node<T>> createF2Map(final Set<TreePattern<T>> f1,
       final Set<TreePattern<T>> f2) {
-    final Multimap<T, Node<T>> f2Map = HashMultimap.create(f1.size(), f2.size());
+    final Multimap<T, Node<T>> f2Map = ArrayListMultimap.create(f1.size(), f2.size());
     for (final TreePattern<T> pattern : f2) {
       final Node<T> rootNode = pattern.getRootNode();
       f2Map.put(rootNode.getLabel(), rootNode.getRightChild());

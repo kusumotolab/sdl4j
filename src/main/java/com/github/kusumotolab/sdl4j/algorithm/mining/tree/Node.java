@@ -1,10 +1,13 @@
 package com.github.kusumotolab.sdl4j.algorithm.mining.tree;
 
+import java.lang.ref.SoftReference;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 
 public class Node<T> {
 
@@ -12,6 +15,9 @@ public class Node<T> {
   private final Node<T> parent;
   private final int position;
   private final List<Node<T>> children = Lists.newArrayList();
+
+  private SoftReference<Multimap<T, Node<T>>> cacheNodeMap = new SoftReference<>(null);
+  private SoftReference<List<Node<T>>> cacheDescents = new SoftReference<>(null);
 
   private Node(final T label, final Node<T> parent, final int position) {
     this.label = label;
@@ -42,18 +48,40 @@ public class Node<T> {
     return rootNode;
   }
 
-  public Node<T> deepCopy() {
-    return Node.createTree(getLabels());
-  }
-
   public static <T> Node<T> createRootNode(final T label) {
     return new Node<>(label, null, 0);
+  }
+
+  public Node<T> deepCopy() {
+    return Node.createTree(getLabels());
   }
 
   public Node<T> createChildNode(final T label) {
     final Node<T> node = new Node<>(label, this, this.children.size());
     children.add(node);
+    clearCache();
     return node;
+  }
+
+  private void clearCache() {
+    cacheDescents.clear();
+    cacheNodeMap.clear();
+    if (parent != null) {
+      parent.clearCache();
+    }
+  }
+
+  private Multimap<T, Node<T>> getCacheMap() {
+    Multimap<T, Node<T>> multimap = cacheNodeMap.get();
+    if (multimap != null) {
+      return multimap;
+    }
+    multimap = ArrayListMultimap.create();
+    for (final Node<T> node : getDescents()) {
+      multimap.put(node.getLabel(), node);
+    }
+    this.cacheNodeMap = new SoftReference<>(multimap);
+    return multimap;
   }
 
   public T getLabel() {
@@ -73,12 +101,17 @@ public class Node<T> {
   }
 
   public List<Node<T>> getDescents() {
+    final List<Node<T>> cache = cacheDescents.get();
+    if (cache != null) {
+      return cache;
+    }
     final List<Node<T>> list = Lists.newArrayList();
     list.add(this);
     for (final Node<T> child : children) {
       final List<Node<T>> descents = child.getDescents();
       list.addAll(descents);
     }
+    this.cacheDescents = new SoftReference<>(list);
     return list;
   }
 
@@ -116,18 +149,11 @@ public class Node<T> {
   }
 
   public int countPatterns(final Node<T> subtree) {
-    int counter = 0;
-    final T subtreeLabel = subtree.getLabel();
-    for (final Node<T> node : getDescents()) {
-      final T label = node.getLabel();
-      if (!label.equals(subtreeLabel)) {
-        continue;
-      }
-      if (node.containsInOrder(subtree)) {
-        counter+= 1;
-      }
-    }
-    return counter;
+    return ((int) getCacheMap().get(subtree.getLabel())
+        .stream()
+        .filter(node -> node.containsInOrder(subtree))
+        .count());
+
   }
 
   // root同士の比較
@@ -148,6 +174,7 @@ public class Node<T> {
     return false;
 
   }
+
   @Override
   public boolean equals(final Object o) {
     if (this == o) {

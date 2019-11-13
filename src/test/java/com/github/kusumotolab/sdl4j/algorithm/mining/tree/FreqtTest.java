@@ -35,7 +35,6 @@ public class FreqtTest {
 
     final Freqt<Integer> freqt = new Freqt<>();
     final Set<TreePattern<Integer>> result = freqt.mining(trees, 0.2);
-    result.forEach(e -> System.out.println(e.getRootNode().toLongString() + "\n"));
     assertThat(result).hasSize(10);
   }
 }
