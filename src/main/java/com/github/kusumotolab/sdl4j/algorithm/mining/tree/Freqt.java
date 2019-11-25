@@ -12,25 +12,46 @@ import com.google.common.collect.Sets;
 
 public class Freqt<T> implements SubtreeMining<T> {
 
+  private final Observer<T> observer;
+
+  public Freqt() {
+    this(new Observer<>());
+  }
+
+  public Freqt(final Observer<T> observer) {
+    this.observer = observer;
+  }
+
   @Override
   public Set<TreePattern<T>> mining(final Set<Node<T>> trees, final double minimumSupport) {
     final Set<TreePattern<T>> results = Sets.newHashSet();
+
+    observer.start(trees, minimumSupport);
     final int borderline = extractBorderline(trees, minimumSupport);
 
+    int k = 1;
     final Set<TreePattern<T>> f1 = extractF1(trees, borderline);
+    observer.willAddNewFk(f1, k, results);
     results.addAll(f1);
+    k += 1;
 
     final Set<TreePattern<T>> f2 = extractF2(trees, f1, borderline);
+    observer.willAddNewFk(f2, k, results);
     results.addAll(f2);
+    k += 1;
 
     final Multimap<T, Node<T>> f2Map = createF2Map(f1, f2);
 
     Set<TreePattern<T>> fk = f2;
     while (!fk.isEmpty()) {
       final Set<TreePattern<T>> fkPlus1 = extractFkPlus1(trees, fk, f2Map, borderline);
+      observer.willAddNewFk(fkPlus1, k, results);
       results.addAll(fkPlus1);
       fk = fkPlus1;
+      k += 1;
     }
+
+    observer.finish(results);
     return results;
   }
 
@@ -131,5 +152,18 @@ public class Freqt<T> implements SubtreeMining<T> {
         .map(tree -> tree.countPatterns(subtree))
         .reduce(Integer::sum)
         .orElse(0);
+  }
+
+  public static class Observer<T> {
+
+    public void start(final Set<Node<T>> rootNodes, final double minimumSupport) {
+    }
+
+    public void finish(final Set<TreePattern<T>> output) {
+    }
+
+    public void willAddNewFk(final Set<TreePattern<T>> fk, int k,
+        final Set<TreePattern<T>> results) {
+    }
   }
 }
