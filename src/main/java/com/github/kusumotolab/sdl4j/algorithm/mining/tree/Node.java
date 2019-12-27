@@ -18,6 +18,7 @@ public class Node<T> {
 
   private SoftReference<Multimap<T, Node<T>>> cacheNodeMap = new SoftReference<>(null);
   private SoftReference<List<Node<T>>> cacheDescents = new SoftReference<>(null);
+  private SoftReference<List<Label<T>>> cacheLabels = new SoftReference<>(null);
 
   private Node(final T label, final Node<T> parent, final int position) {
     this.label = label;
@@ -116,7 +117,13 @@ public class Node<T> {
   }
 
   public List<Label<T>> getLabels() {
-    return getLabels(0);
+    final List<Label<T>> cache = cacheLabels.get();
+    if (cache != null) {
+      return cache;
+    }
+    final List<Label<T>> labels = getLabels(0);
+    cacheLabels = new SoftReference<>(labels);
+    return labels;
   }
 
   private List<Label<T>> getLabels(final int depth) {
