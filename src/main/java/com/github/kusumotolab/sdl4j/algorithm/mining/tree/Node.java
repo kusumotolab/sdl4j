@@ -158,28 +158,39 @@ public class Node<T> {
   public int countPatterns(final Node<T> subtree) {
     return ((int) getCacheMap().get(subtree.getLabel())
         .stream()
-        .filter(node -> node.containsInOrder(subtree))
+        .filter(node -> node.contains(subtree))
         .count());
 
   }
 
   // root同士の比較
-  private boolean containsInOrder(final Node<T> subtree) {
-    final List<Label<T>> thisLabels = getLabels();
-    final List<Label<T>> subtreeLabels = subtree.getLabels();
+  private boolean contains(final Node<T> subtree) {
+    final List<Node<T>> subtreeChildren = subtree.getChildren();
+    final List<Node<T>> children = this.getChildren();
+
     int index = 0;
-    for (final Label<T> element : thisLabels) {
-      final Label<T> subtreeLabel = subtreeLabels.get(index);
-      if (!subtreeLabel.equals(element)) {
-        continue;
+    for (final Node<T> subtreeChild : subtreeChildren) {
+      final T subtreeLabel = subtreeChild.getLabel();
+
+      boolean foundMatchedSubtreeChild = false;
+
+      for (int i = index; i < children.size(); i++) {
+        final Node<T> child = children.get(i);
+        if (!child.getLabel().equals(subtreeLabel)) {
+          continue;
+        }
+
+        if (child.contains(subtreeChild)) {
+          index = i + 1;
+          foundMatchedSubtreeChild = true;
+          break;
+        }
       }
-      index++;
-      if (index == subtreeLabels.size()) {
-        return true;
+      if (!foundMatchedSubtreeChild) {
+        return false;
       }
     }
-    return false;
-
+    return true;
   }
 
   @Override
