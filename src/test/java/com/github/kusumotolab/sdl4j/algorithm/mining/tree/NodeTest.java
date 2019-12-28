@@ -23,14 +23,14 @@ public class NodeTest {
 
   @Test
   public void testTreeConstruct() {
-    final Node<Integer> node = Node.createTree(labels);
+    final Node<Integer> node = Node.createTree("tree1", labels);
     final List<Label<Integer>> labels = node.getLabels();
     assertThat(labels).hasSize(10);
   }
 
   @Test
   public void testRightMostBranch() {
-    final Node<Integer> root = Node.createTree(labels);
+    final Node<Integer> root = Node.createTree("tree1", labels);
     final List<Node<Integer>> rightMostBranch = root.getRightMostBranch();
     final List<Integer> rightMostBranchLabel = rightMostBranch.stream()
         .map(Node::getLabel)

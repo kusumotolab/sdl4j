@@ -29,7 +29,7 @@ public class FreqtTest {
 
   @Test
   public void testMining() {
-    final Node<Integer> rootNode = Node.createTree(labels);
+    final Node<Integer> rootNode = Node.createTree("tree1", labels);
     final Set<Node<Integer>> trees = Sets.newHashSet();
     trees.add(rootNode);
 

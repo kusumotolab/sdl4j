@@ -11,6 +11,7 @@ import com.google.common.collect.Multimap;
 
 public class Node<T> {
 
+  private final String treeId;
   private final T label;
   private final Node<T> parent;
   private final int position;
@@ -20,15 +21,16 @@ public class Node<T> {
   private SoftReference<List<Node<T>>> cacheDescents = new SoftReference<>(null);
   private SoftReference<List<Label<T>>> cacheLabels = new SoftReference<>(null);
 
-  private Node(final T label, final Node<T> parent, final int position) {
+  private Node(final String treeId, final T label, final Node<T> parent, final int position) {
+    this.treeId = treeId;
     this.label = label;
     this.parent = parent;
     this.position = position;
   }
 
-  public static <T> Node<T> createTree(final List<Label<T>> labels) {
+  public static <T> Node<T> createTree(final String treeId, final List<Label<T>> labels) {
     final Label<T> rootLabel = labels.get(0);
-    final Node<T> rootNode = createRootNode(rootLabel.getLabel());
+    final Node<T> rootNode = createRootNode(treeId, rootLabel.getLabel());
 
     if (labels.size() == 1) {
       return rootNode;
@@ -49,16 +51,16 @@ public class Node<T> {
     return rootNode;
   }
 
-  public static <T> Node<T> createRootNode(final T label) {
-    return new Node<>(label, null, 0);
+  public static <T> Node<T> createRootNode(final String treeId, final T label) {
+    return new Node<>(treeId, label, null, 0);
   }
 
   public Node<T> deepCopy() {
-    return Node.createTree(getLabels());
+    return Node.createTree(treeId, getLabels());
   }
 
   public Node<T> createChildNode(final T label) {
-    final Node<T> node = new Node<>(label, this, this.children.size());
+    final Node<T> node = new Node<>(treeId, label, this, this.children.size());
     children.add(node);
     clearCache();
     return node;
@@ -83,6 +85,10 @@ public class Node<T> {
     }
     this.cacheNodeMap = new SoftReference<>(multimap);
     return multimap;
+  }
+
+  public String getTreeId() {
+    return treeId;
   }
 
   public T getLabel() {
