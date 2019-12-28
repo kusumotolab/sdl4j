@@ -19,6 +19,10 @@ public class TreePattern<T> implements CountablePattern {
     return new TreePattern<>(rootNode.deepCopy(), treeIds, count);
   }
 
+  public Set<String> getTreeIds() {
+    return treeIds;
+  }
+
   public Node<T> getRootNode() {
     return rootNode;
   }
