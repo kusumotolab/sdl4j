@@ -69,6 +69,7 @@ public class Freqt<T> implements SubtreeMining<T> {
         .collect(Collectors.toSet());
 
     return element.stream()
+        .map(e -> Node.createRootNode(e.getTreeId(), e.getLabel()))
         .map(candidate -> {
           final CountResult countResult = countPattern(trees, candidate);
           return new TreePattern<>(candidate, countResult.ids, countResult.count);
@@ -77,19 +78,18 @@ public class Freqt<T> implements SubtreeMining<T> {
         .collect(Collectors.toSet());
   }
 
-  private Set<TreePattern<T>> extractF2(final Set<Node<T>> trees, final Set<TreePattern<T>> f1,
-      final int borderline) {
+  private Set<TreePattern<T>> extractF2(final Set<Node<T>> trees, final Set<TreePattern<T>> f1, final int borderline) {
     final Set<Node<T>> candidates = Sets.newHashSet();
     for (final TreePattern<T> element1 : f1) {
-      final T label1 = element1.getRootNode()
-          .getLabel();
+      final T label = element1.getRootNode().getLabel();
+
       for (final TreePattern<T> element2 : f1) {
-        final Node<T> root = Node.createRootNode(element1.getRootNode().getTreeId(), label1);
-        root.createChildNode(element2.getRootNode()
-            .getLabel());
+        final Node<T> root = Node.createRootNode(element1.getRootNode().getTreeId(), label);
+        root.createChildNode(element2.getRootNode().getLabel());
         candidates.add(root);
       }
     }
+
     return candidates.stream()
         .map(node -> {
           final CountResult countResult = countPattern(trees, node);
