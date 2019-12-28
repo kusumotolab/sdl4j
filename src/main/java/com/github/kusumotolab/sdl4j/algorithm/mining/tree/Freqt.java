@@ -1,12 +1,11 @@
 package com.github.kusumotolab.sdl4j.algorithm.mining.tree;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
@@ -64,24 +63,17 @@ public class Freqt<T> implements SubtreeMining<T> {
   }
 
   private Set<TreePattern<T>> extractF1(final Set<Node<T>> trees, final int borderline) {
-    final Map<T, Integer> map = Maps.newHashMap();
-
-    trees.stream()
+    final Set<Node<T>> element = trees.stream()
         .map(Node::getDescents)
         .flatMap(Collection::stream)
-        .forEach(node -> {
-          final T label = node.getLabel();
-          final Integer count = map.computeIfAbsent(label, e -> 0);
-          map.put(label, count + 1);
-        });
+        .collect(Collectors.toSet());
 
-    return map.entrySet()
-        .stream()
-        .filter(e -> {
-          final Integer count = e.getValue();
-          return count >= borderline;
+    return element.stream()
+        .map(candidate -> {
+          final CountResult countResult = countPattern(trees, candidate);
+          return new TreePattern<>(candidate, countResult.ids, countResult.count);
         })
-        .map(e -> new TreePattern<>(Node.createRootNode(e.getKey()), e.getValue()))
+        .filter(e -> e.countPatten() >= borderline)
         .collect(Collectors.toSet());
   }
 
@@ -92,7 +84,7 @@ public class Freqt<T> implements SubtreeMining<T> {
       final T label1 = element1.getRootNode()
           .getLabel();
       for (final TreePattern<T> element2 : f1) {
-        final Node<T> root = Node.createRootNode(label1);
+        final Node<T> root = Node.createRootNode(element1.getRootNode().getTreeId(), label1);
         root.createChildNode(element2.getRootNode()
             .getLabel());
         candidates.add(root);
@@ -100,8 +92,8 @@ public class Freqt<T> implements SubtreeMining<T> {
     }
     return candidates.stream()
         .map(node -> {
-          final int count = countPattern(trees, node);
-          return new TreePattern<>(node, count);
+          final CountResult countResult = countPattern(trees, node);
+          return new TreePattern<>(node, countResult.ids, countResult.count);
         })
         .filter(e -> e.countPatten() >= borderline)
         .collect(Collectors.toSet());
@@ -140,18 +132,25 @@ public class Freqt<T> implements SubtreeMining<T> {
 
     return candidates.stream()
         .map(candidate -> {
-          final int count = countPattern(trees, candidate);
-          return new TreePattern<>(candidate, count);
+          final CountResult countResult = countPattern(trees, candidate);
+          return new TreePattern<>(candidate, countResult.ids, countResult.count);
         })
         .filter(candidate -> candidate.countPatten() >= borderline)
         .collect(Collectors.toSet());
   }
 
-  private int countPattern(final Set<Node<T>> rootTrees, final Node<T> subtree) {
+  private CountResult countPattern(final Set<Node<T>> rootTrees, final Node<T> subtree) {
     return rootTrees.stream()
-        .map(tree -> tree.countPatterns(subtree))
-        .reduce(Integer::sum)
-        .orElse(0);
+        .map(tree -> {
+          final int countPatterns = tree.countPatterns(subtree);
+          return new CountResult(countPatterns, tree.getTreeId());
+        })
+        .reduce((e1, e2) -> {
+          final Set<String> ids = Sets.newHashSet(e1.ids);
+          ids.addAll(e2.ids);
+          return new CountResult(e1.count + e2.count, ids);
+        })
+        .orElse(new CountResult(0, Collections.emptySet()));
   }
 
   public static class Observer<T> {
@@ -162,8 +161,22 @@ public class Freqt<T> implements SubtreeMining<T> {
     public void finish(final Set<TreePattern<T>> output) {
     }
 
-    public void willAddNewFk(final Set<TreePattern<T>> fk, int k,
-        final Set<TreePattern<T>> results) {
+    public void willAddNewFk(final Set<TreePattern<T>> fk, int k, final Set<TreePattern<T>> results) {
+    }
+  }
+
+  private static class CountResult {
+    private final int count;
+    private final Set<String> ids;
+
+    public CountResult(final int count, final Set<String> ids) {
+      this.count = count;
+      this.ids = ids;
+    }
+
+    public CountResult(final int count, final String id) {
+      this.count = count;
+      ids = Sets.newHashSet(id);
     }
   }
 }
