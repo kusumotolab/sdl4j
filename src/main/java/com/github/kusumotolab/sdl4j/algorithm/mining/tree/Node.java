@@ -158,13 +158,21 @@ public class Node<T> {
   public int countPatterns(final Node<T> subtree) {
     return ((int) getCacheMap().get(subtree.getLabel())
         .stream()
-        .filter(node -> node.contains(subtree))
+        .filter(node -> node.containsAtRootNode(subtree))
         .count());
+  }
 
+  public boolean contains(final Node<T> subtree) {
+    for (final Node<T> candidateNode : getCacheMap().get(subtree.getLabel())) {
+      if (candidateNode.containsAtRootNode(subtree)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   // root同士の比較
-  private boolean contains(final Node<T> subtree) {
+  private boolean containsAtRootNode(final Node<T> subtree) {
     final List<Node<T>> subtreeChildren = subtree.getChildren();
     final List<Node<T>> children = this.getChildren();
 
@@ -180,7 +188,7 @@ public class Node<T> {
           continue;
         }
 
-        if (child.contains(subtreeChild)) {
+        if (child.containsAtRootNode(subtreeChild)) {
           index = i + 1;
           foundMatchedSubtreeChild = true;
           break;
